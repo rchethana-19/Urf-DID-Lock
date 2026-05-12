@@ -122,6 +122,12 @@ Unlock
 
 ---
 
+## Repository layout
+
+The **Flutter mobile app** and related tooling live under **`software/`** (`pubspec.yaml`, `lib/`, `android/`, `web/`, `test/`, and `generate_signature.py` for offline signature checks). Hardware firmware (ESP32 / Arduino) can be added alongside at the repository root or in a dedicated folder when you publish it.
+
+---
+
 ## Setup Instructions
 
 ### 1. Upload ESP32 Code
@@ -136,7 +142,19 @@ Unlock
 
 ---
 
-### 2. Generate Keys
+### 2. Run the Flutter app
+
+From the repository root:
+
+```bash
+cd software
+flutter pub get
+flutter run
+```
+
+---
+
+### 3. Generate Keys
 
 Use Python or mobile app to generate:
 - Public Key  
@@ -144,7 +162,7 @@ Use Python or mobile app to generate:
 
 ---
 
-### 3. Run System
+### 4. Run System
 
 - Power ESP32  
 - Connect via BLE  
