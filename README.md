@@ -40,37 +40,9 @@ The project demonstrates that strong cryptographic authentication can be achieve
 
 ## System Architecture
 
-```text
-                    ┌──────────────────────────┐
-                    │     Mobile Application   │
-                    │──────────────────────────│
-                    │ • Generates key pair     │
-                    │ • Stores private key     │
-                    │ • Connects via BLE       │
-                    │ • Signs nonce            │
-                    └────────────┬─────────────┘
-                                 │
-                                 │ BLE Communication
-                                 ▼
-              ┌────────────────────────────────────┐
-              │          ESP32 Smart Lock          │
-              │────────────────────────────────────│
-              │ • BLE GATT Server                 │
-              │ • Random Nonce Generation         │
-              │ • SHA-512 Hashing                 │
-              │ • Ed25519 Signature Verification  │
-              │ • Replay Attack Protection        │
-              │ • Unlock Control Logic            │
-              └────────────┬──────────────────────┘
-                           │
-                           │ GPIO Signal
-                           ▼
-              ┌──────────────────────────┐
-              │ Relay / Solenoid Lock    │
-              │──────────────────────────│
-              │ • Physical Lock Control  │
-              └──────────────────────────┘
-```
+<p align="center">
+  <img src="images/architecture.png" width="700"/>
+</p>
 
 ---
 
