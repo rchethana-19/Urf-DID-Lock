@@ -249,3 +249,8 @@ This project demonstrates that **strong cryptographic authentication can be impl
 The system validates the feasibility of lightweight decentralized authentication mechanisms for next-generation smart lock applications.
 
 ---
+## License
+
+This project is proprietary and protected under an “All Rights Reserved” license.
+
+Unauthorized copying, modification, distribution, or commercial use of this project is prohibited without explicit permission from the authors.
