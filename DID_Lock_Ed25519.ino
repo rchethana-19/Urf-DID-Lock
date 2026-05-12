@@ -1,3 +1,13 @@
+/*
+Smart Lock Authentication System
+Authors:
+- Chethana R
+- Darshan N
+- Rithika Shetty
+- Sanjay N
+RNSIT - URF Project
+*/
+
 #include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
