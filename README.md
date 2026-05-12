@@ -5,146 +5,205 @@
 
 ## Overview
 
-This project presents a **secure, lightweight, and fully offline smart lock system** using **Bluetooth Low Energy (BLE)** and **Ed25519 digital signatures**.
+This project presents a **secure, lightweight, and fully offline smart lock authentication system** using **Bluetooth Low Energy (BLE)** and **Ed25519 digital signatures** on an ESP32 microcontroller.
 
-The system eliminates reliance on cloud infrastructure and static credentials by implementing a **nonce-based challenge-response authentication mechanism** directly on an ESP32 microcontroller.
+The system eliminates dependence on cloud infrastructure and static credentials by implementing a **nonce-based cryptographic challenge-response mechanism** directly on embedded hardware.
+
+The project demonstrates that strong cryptographic authentication can be achieved efficiently on constrained IoT devices while maintaining real-time performance.
 
 ---
 
 ## Key Features
 
-- Fully Offline Authentication (No Internet Required)  
-- Ed25519 Cryptographic Signatures  
-- Replay Attack Protection using Nonce  
-- BLE Communication (Proximity-based access)  
-- Low Latency (~18 ms)  
-- Lightweight Embedded Implementation  
-- Identity-Based Access Control  
+### Current Implementation
 
-
-
-## System Architecture
-```
-Guest App → BLE → ESP32 Smart Lock
-↓
-Nonce Generation
-↓
-Signature Verification
-↓
-Unlock
-```
-
-
-## Authentication Flow
-
-1. ESP32 generates a random **nonce**
-2. Mobile app signs the nonce using **private key**
-3. ESP32 verifies signature using **public key**
-4. If valid →  Unlock
+- Fully Offline Authentication (No Internet Required)
+- BLE-based proximity authentication
+- Nonce-based replay attack prevention
+- Ed25519 digital signature verification
+- Real-time cryptographic verification (~18 ms)
+- Lightweight embedded implementation on ESP32
+- Secure unlock control using relay/MOSFET
 
 ---
 
-## Security Model
+### Proposed / Extended Architecture
 
-| Component     | Purpose                          |
-|--------------|----------------------------------|
-| Nonce        | Prevent replay attacks           |
-| Ed25519      | Strong authentication            |
-| Private Key  | User identity (secret)           |
-| Public Key   | Stored for verification          |
-| BLE          | Communication channel            |
+- Owner-authorized guest delegation
+- Multi-user identity management
+- Expiry-based access control
+- One-time guest access
+- Decentralized Identity (DID) integration
+- Access revocation mechanism
+
+---
+
+## System Architecture
+
+```text
+                    ┌──────────────────────────┐
+                    │     Mobile Application   │
+                    │──────────────────────────│
+                    │ • Generates key pair     │
+                    │ • Stores private key     │
+                    │ • Connects via BLE       │
+                    │ • Signs nonce            │
+                    └────────────┬─────────────┘
+                                 │
+                                 │ BLE Communication
+                                 ▼
+              ┌────────────────────────────────────┐
+              │          ESP32 Smart Lock          │
+              │────────────────────────────────────│
+              │ • BLE GATT Server                 │
+              │ • Random Nonce Generation         │
+              │ • SHA-512 Hashing                 │
+              │ • Ed25519 Signature Verification  │
+              │ • Replay Attack Protection        │
+              │ • Unlock Control Logic            │
+              └────────────┬──────────────────────┘
+                           │
+                           │ GPIO Signal
+                           ▼
+              ┌──────────────────────────┐
+              │ Relay / Solenoid Lock    │
+              │──────────────────────────│
+              │ • Physical Lock Control  │
+              └──────────────────────────┘
+```
+
+---
+
+## Authentication Workflow
+
+```text
+1. Mobile app connects to ESP32 via BLE
+2. ESP32 generates a random nonce
+3. Nonce is sent to the mobile app
+4. App signs nonce using private key
+5. Signed response is sent to ESP32
+6. ESP32 recomputes hash and verifies signature
+7. If valid → Unlock
+8. If invalid → Access denied
+```
+
+---
+
+## Security Features
+
+| Feature | Purpose |
+|----------|----------|
+| Nonce-based Authentication | Prevent replay attacks |
+| Ed25519 Signatures | Strong identity verification |
+| SHA-512 Hashing | Message integrity |
+| BLE Proximity | Localized communication |
+| Offline Verification | No cloud dependency |
+| Public-Key Cryptography | No shared secret exposure |
 
 ---
 
 ## Hardware Requirements
 
 - ESP32 DevKit (BLE-enabled)
-- Relay Module
+- Relay Module / MOSFET
 - 12V Solenoid Lock
 - Power Supply
-- (Optional) DS3231 RTC Module
-- (Optional) SSD1306 OLED Display
+- Jumper Wires
+- Breadboard / PCB
+
+### Optional Components
+
+- DS3231 RTC Module
+- SSD1306 OLED Display
 
 ---
 
 ## Software Stack
 
-- Embedded: Arduino (ESP32)
-- Crypto: Monocypher (Ed25519)
-- Mobile App: Flutter
-- Communication: BLE (GATT)
-- Storage: NVS (Non-Volatile Storage)
+| Component | Technology |
+|-----------|------------|
+| Embedded Firmware | Arduino Framework |
+| Cryptography | Monocypher (Ed25519) |
+| Mobile Application | Flutter |
+| Communication | BLE GATT |
+| JSON Handling | ArduinoJson |
 
 ---
 
 ## Mobile App Features
 
-- Ed25519 key pair generation  
-- Secure key storage (Android Keystore)  
-- BLE communication  
-- Nonce signing  
-- Authentication request handling  
+- Ed25519 key pair generation
+- Secure private key storage
+- BLE communication with ESP32
+- Nonce signing
+- Authentication handling
 
 ---
 
 ## Experimental Setup
 
-- Device: ESP32 (240 MHz dual-core)  
-- Crypto: Ed25519 signatures  
-- Communication: BLE GATT  
-- Testing:
-  - 100+ replay attack simulations  
-  - Microsecond latency measurement  
+| Parameter | Details |
+|-----------|---------|
+| Hardware | ESP32 DevKit |
+| Clock Speed | 240 MHz Dual-Core |
+| Cryptography | Ed25519 |
+| Communication | BLE GATT |
+| Measurement | Microsecond-level timing |
+| Testing | 100+ replay attack simulations |
 
 ---
 
 ## Performance Results
 
-| Metric             | Value      |
-|-------------------|-----------|
-| Avg Latency       | ~18.3 ms  |
-| Min               | ~18.29 ms |
-| Max               | ~18.80 ms |
-| Replay Detection  | 100%      |
-| False Acceptance  | 0%        |
-| False Rejection   | ~0%       |
+| Metric | Value |
+|--------|-------|
+| Average Latency | ~18.3 ms |
+| Minimum Latency | ~18.29 ms |
+| Maximum Latency | ~18.80 ms |
+| Replay Detection Rate | 100% |
+| False Acceptance Rate | 0% |
+| False Rejection Rate | ~0% |
 
 ---
 
-## Comparison
+## Performance Analysis
 
-| Method        | Internet | Security | Replay Protection |
-|--------------|---------|----------|------------------|
-| RFID         | No      | Low      | No               |
-| OTP (Cloud)  | Yes     | Medium   | Yes              |
-| BLE Token    | No      | Medium   | No               |
-| **Proposed** | No      | High     | Yes              |
+- Stable execution across repeated runs
+- Low latency suitable for real-time applications
+- Minimal execution variance (~0.5 ms)
+- Efficient cryptographic verification on constrained hardware
+- Strong replay attack resistance
 
 ---
 
-## Repository layout
+## Comparative Analysis
 
-The **Flutter mobile app** and related tooling live under **`software/`** (`pubspec.yaml`, `lib/`, `android/`, `web/`, `test/`, and `generate_signature.py` for offline signature checks). Hardware firmware (ESP32 / Arduino) can be added alongside at the repository root or in a dedicated folder when you publish it.
+| Method | Internet Dependency | Security | Replay Protection | Latency |
+|--------|---------------------|----------|-------------------|---------|
+| RFID | No | Low | No | ~5 ms |
+| OTP (Cloud) | Yes | Medium | Yes | >500 ms |
+| BLE Token | No | Medium | No | ~10 ms |
+| **Proposed System** | No | High | Yes | ~18 ms |
 
 ---
 
 ## Setup Instructions
 
-### 1. Upload ESP32 Code
+### 1. Upload ESP32 Firmware
 
-- Open Arduino IDE  
-- Install libraries:
-  - RTClib  
-  - Adafruit SSD1306  
-  - ArduinoJson  
-  - Monocypher  
-- Upload code to ESP32  
+Install required Arduino libraries:
+
+- BLEDevice
+- ArduinoJson
+- Monocypher
+- RTClib (optional)
+- Adafruit SSD1306 (optional)
+
+Upload firmware to ESP32 using Arduino IDE.
 
 ---
 
-### 2. Run the Flutter app
-
-From the repository root:
+### 2. Run Flutter App
 
 ```bash
 cd software
@@ -154,53 +213,67 @@ flutter run
 
 ---
 
-### 3. Generate Keys
+### 3. Authentication Process
 
-Use Python or mobile app to generate:
-- Public Key  
-- Private Key  
-
----
-
-### 4. Run System
-
-- Power ESP32  
-- Connect via BLE  
-- Receive nonce  
-- Sign nonce  
-- Send signature  
-- Unlock  
+1. Power ESP32
+2. Open mobile app
+3. Connect via BLE
+4. Receive nonce
+5. Sign nonce
+6. Send signed response
+7. Unlock on successful verification
 
 ---
 
+## Security Considerations
+
+### Replay Attack Prevention
+Each authentication request uses a newly generated nonce, ensuring previously captured messages cannot be reused.
+
+### Offline Operation
+Authentication is performed entirely on-device without requiring cloud communication.
+
+### Cryptographic Integrity
+ESP32 independently reconstructs and hashes messages before verification, ensuring no client-side computation is blindly trusted.
+
 ---
 
-## Future Work
+## Proposed Future Work
 
-- Multi-user support (DID-based system)  
-- Access revocation mechanism  
-- OTA firmware updates  
-- Biometric authentication integration  
-- Large-scale IoT deployment  
+- Multi-user support using DID
+- Guest delegation model
+- Expiry-based access control
+- One-time authentication tokens
+- Secure access revocation
+- OTA firmware updates
+- Biometric integration
+- Post-Quantum Cryptography migration
 
 ---
 
 ## Authors
 
-- Chethana R  
-- Darshan N  
-- Rithika Shetty  
-- Sanjay N  
+- Chethana R
+- Darshan N
+- Rithika Shetty
+- Sanjay N
+
+---
+
+## References
+
+1. Lam & Chi (2016) – IoT Identity Framework  
+2. Cao et al. (2023) – Blockchain Systems  
+3. NIST SP 800-63-3 (2017) – Digital Identity Guidelines  
+4. Shafique et al. (2020) – IoT Security Review  
+5. Basir & Omar (2020) – Decentralized Identity Models  
 
 ---
 
 ## Conclusion
 
-This project demonstrates that **strong cryptographic security can be achieved on embedded systems** while maintaining **offline functionality and real-time performance**.
+This project demonstrates that **strong cryptographic authentication can be implemented efficiently on embedded IoT hardware while maintaining low latency, offline capability, and robust replay attack protection**.
+
+The system validates the feasibility of lightweight decentralized authentication mechanisms for next-generation smart lock applications.
 
 ---
-
-## Tagline
-
-**Secure identity. Offline access. Real-time protection.**
-
