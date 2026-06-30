@@ -24,7 +24,7 @@ extern "C" {
 #define LOCK_PIN 13
 const int unlockDuration = 3000; // 3 seconds
 
-// ---------------- Public key (Ed25519 – matches your Dart seed)
+// ---------------- Public key (Ed25519 – Dart seed - Test only not a real public key!)
 const uint8_t publicKey[32] = {
   0xd7, 0x5a, 0x98, 0x01, 0x82, 0xb1, 0x0a, 0xb7,
   0xd5, 0x4b, 0xfe, 0xd3, 0xc9, 0x64, 0x07, 0x3a,
@@ -47,11 +47,11 @@ bool deviceConnected = false;
 
 // ---------------- Unlock Function ----------------
 void unlockCycle() {
-  Serial.println("🔓 Unlocking (MOSFET ON)");
+  Serial.println(" Unlocking (MOSFET ON)");
   digitalWrite(LOCK_PIN, HIGH);
   delay(unlockDuration);
   digitalWrite(LOCK_PIN, LOW);
-  Serial.println("🔒 Locked (MOSFET OFF)");
+  Serial.println(" Locked (MOSFET OFF)");
 }
 
 // ---------------- hex → bytes (64-byte sig)
@@ -86,7 +86,7 @@ class ServerCB : public BLEServerCallbacks {
     sprintf(buf, "%08X", r);
     currentNonce = String(buf);
 
-    Serial.print("🔐 New Nonce Generated: ");
+    Serial.print(" New Nonce Generated: ");
     Serial.println(currentNonce);
 
     nonceChar->setValue(currentNonce.c_str());
@@ -95,7 +95,7 @@ class ServerCB : public BLEServerCallbacks {
 
   void onDisconnect(BLEServer *pServer) override {
     deviceConnected = false;
-    Serial.println("❌ BLE disconnected");
+    Serial.println(" BLE disconnected");
     currentNonce = "";
     pServer->getAdvertising()->start();
   }
@@ -106,12 +106,12 @@ class VPWriteCB : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *pChar) override {
 
     String vp = pChar->getValue();
-    Serial.println("\n📩 VP Received:");
+    Serial.println("\nVP Received:");
     Serial.println(vp);
 
     StaticJsonDocument<1024> doc;
     if (deserializeJson(doc, vp)) {
-      Serial.println("❌ JSON parse failed");
+      Serial.println(" JSON parse failed");
       return;
     }
 
@@ -120,7 +120,7 @@ class VPWriteCB : public BLECharacteristicCallbacks {
     const char *sigHex = doc["signature_hex"];
 
     if (!nonceRaw || !vc || !sigHex) {
-      Serial.println("❌ Missing fields");
+      Serial.println("Missing fields");
       return;
     }
 
@@ -132,14 +132,14 @@ class VPWriteCB : public BLECharacteristicCallbacks {
     n.toUpperCase();
 
     if (n != currentNonce) {
-      Serial.println("❌ NONCE mismatch");
+      Serial.println(" NONCE mismatch");
       statusChar->setValue("NONCE_MISMATCH");
       statusChar->notify();
       return;
     }
 
     if (String(vc) != "valid_access") {
-      Serial.println("❌ VC invalid");
+      Serial.println(" VC invalid");
       statusChar->setValue("VC_INVALID");
       statusChar->notify();
       return;
@@ -147,7 +147,7 @@ class VPWriteCB : public BLECharacteristicCallbacks {
 
     uint8_t sig[64];
     if (!hexToBytes(sigHex, sig, 64)) {
-      Serial.println("❌ Signature hex invalid");
+      Serial.println("Signature hex invalid");
       statusChar->setValue("SIG_BAD");
       statusChar->notify();
       return;
@@ -161,14 +161,14 @@ class VPWriteCB : public BLECharacteristicCallbacks {
     int ok = crypto_ed25519_check(sig, publicKey, hash, 64);
 
     if (ok == 0) {
-      Serial.println("🔓 ACCESS GRANTED");
+      Serial.println(" ACCESS GRANTED");
       statusChar->setValue("UNLOCKED");
       statusChar->notify();
 
-      unlockCycle();   // 🔥 MOSFET CONTROL HERE
+      unlockCycle();   //  MOSFET CONTROL HERE
 
     } else {
-      Serial.println("❌ Signature INVALID");
+      Serial.println(" Signature INVALID");
       statusChar->setValue("DENIED");
       statusChar->notify();
     }
@@ -215,7 +215,7 @@ void setup() {
   adv->setScanResponse(true);
   adv->start();
 
-  Serial.println("📡 SmartLock BLE Started – waiting for phone");
+  Serial.println(" SmartLock BLE Started – waiting for phone");
 }
 
 // ---------------- LOOP ----------------
